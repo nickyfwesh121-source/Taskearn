@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | TaskWave</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    <h2>Create Account</h2>
+
+    <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="username" placeholder="Enter username">
+    </div>
+
+    <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="email" placeholder="Enter email">
+    </div>
+
+    <div class="form-group">
+        <label>Referral Code</label>
+        <input type="text" id="referral" placeholder="Optional">
+    </div>
+
+    <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="Enter password">
+    </div>
+
+    <div class="form-group">
+        <label>Confirm Password</label>
+        <input type="password" id="confirmPassword" placeholder="Confirm password">
+    </div>
+
+    <button class="btn" onclick="registerUser()">Register</button>
+
+    <p class="link">
+        Already have an account? <a href="login.html">Login</a>
+    </p>
+</div>
+
+<script>
+/* -----------------------------------------
+   AUTO-FILL REFERRAL FROM ?ref=
+----------------------------------------- */
+document.addEventListener("DOMContentLoaded", () => {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get("ref");
+
+    if (ref) {
+        document.getElementById("referral").value = ref;
+    }
+});
+
+/* -----------------------------------------
+   UNIQUE REFERRAL CODE GENERATOR
+----------------------------------------- */
+function generateReferralCode(username) {
+    const rand = Math.floor(100000 + Math.random() * 900000);
+    return "TW-" + username.slice(0,3).toUpperCase() + "-" + rand;
+}
+
+/* -----------------------------------------
+   REGISTER USER (FULLY FIXED)
+----------------------------------------- */
+function registerUser() {
+    let username = document.getElementById("username").value.trim();
+    let email = document.getElementById("email").value.trim();
+    let pass = document.getElementById("password").value.trim();
+    let confirmPass = document.getElementById("confirmPassword").value.trim();
+    let referral = document.getElementById("referral").value.trim();
+
+    if (!username || !email || !pass || !confirmPass) {
+        alert("All fields except referral are required.");
+        return;
+    }
+
+    if (pass !== confirmPass) {
+        alert("Passwords do not match.");
+        return;
+    }
+
+    // Check if username exists
+    if (localStorage.getItem("user_" + username)) {
+        alert("Username already exists.");
+        return;
+    }
+
+    // Create unique referral code
+    const referralCode = generateReferralCode(username);
+
+    // NEW USER DATA (FIXED)
+    const userData = {
+        username,
+        email,
+        password: pass,
+        balance: 0,
+        refBalance: 0,
+        referralCode,       // their own referral code
+        referredBy: referral || null   // SAVE WHO REFERRED THEM
+    };
+
+    // Save new user
+    localStorage.setItem("user_" + username, JSON.stringify(userData));
+
+    /* -----------------------------------------
+       REFERRAL BONUS — FULLY FIXED
+    ----------------------------------------- */
+    if (referral) {
+        let allUsers = Object.keys(localStorage).filter(k => k.startsWith("user_"));
+        let refUserKey = allUsers.find(k => {
+            let u = JSON.parse(localStorage.getItem(k));
+            return u.referralCode === referral;
+        });
+
+        if (refUserKey) {
+            let refUser = JSON.parse(localStorage.getItem(refUserKey));
+
+            // Add ₦50 referral reward
+            refUser.refBalance = (refUser.refBalance || 0) + 50;
+
+            // Save updated referrer
+            localStorage.setItem(refUserKey, JSON.stringify(refUser));
+
+            // Log transaction
+            let txKey = "transactions_" + refUser.username;
+            let txList = JSON.parse(localStorage.getItem(txKey) || "[]");
+
+            txList.unshift({
+                type: "Referral Bonus",
+                amount: 50,
+                status: "Approved"
+            });
+
+            localStorage.setItem(txKey, JSON.stringify(txList));
+        }
+    }
+
+    alert("Account created successfully!");
+    window.location.href = "login.html";
+}
+</script>
+
+</body>
+</html>

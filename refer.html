@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Refer & Earn | TaskWave</title>
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .ref-box {
+            background: white;
+            width: 90%;
+            margin: auto;
+            margin-top: 20px;
+            padding: 18px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .copy-btn {
+            margin-top: 10px;
+            background: #007bff;
+            color: white;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 10px;
+        }
+
+        .ref-list-box {
+            background: white;
+            width: 90%;
+            margin: auto;
+            margin-top: 25px;
+            padding: 18px;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+<div class="dash-container">
+    <h2>Refer & Earn</h2>
+
+    <p style="margin-top:10px; text-align:center;">
+        Invite friends and earn <strong>₦50</strong> for each successful signup.
+    </p>
+
+    <!-- Referral Display Box -->
+    <div class="ref-box">
+        Your Referral Code
+        <p id="refCode" style="font-size: 24px; font-weight: bold;"></p>
+
+        <h3>Your Referral Link</h3>
+        <p id="refLink" style="font-size: 14px; word-break: break-all;"></p>
+
+        <button class="copy-btn" onclick="copyLink()">Copy Referral Link</button>
+    </div>
+
+    <!-- Referral List -->
+    <div class="ref-list-box">
+        <h3>People You Referred</h3>
+        <div id="refList" style="margin-top:10px; min-height:20px;">
+            Loading...
+        </div>
+    </div>
+
+</div>
+
+<!-- Bottom Navigation -->
+<div class="bottom-nav">
+    <a href="dashboard.html" class="nav-item">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-text">Home</span>
+    </a>
+
+    <a href="tasks.html" class="nav-item">
+        <span class="nav-icon">📋</span>
+        <span class="nav-text">Tasks</span>
+    </a>
+
+    <a href="refer.html" class="nav-item active">
+        <span class="nav-icon">👥</span>
+        <span class="nav-text">Refer</span>
+    </a>
+
+    <a href="withdraw.html" class="nav-item">
+        <span class="nav-icon">💰</span>
+        <span class="nav-text">Withdraw</span>
+    </a>
+</div>
+
+<script>
+    // Load logged-in user
+    const username = localStorage.getItem("loggedInUser");
+
+    if (!username) {
+        alert("You must log in first.");
+        window.location.href = "login.html";
+    }
+
+    // Get user data
+    const userData = JSON.parse(localStorage.getItem("user_" + username) || "{}");
+
+    // Referral code
+    const referralCode = userData.referralCode || username;
+    document.getElementById("refCode").innerText = referralCode;
+
+    // Referral Link
+    const referralLink = `https://taskwave-signup.netlify.app/?ref=${referralCode}`;
+    document.getElementById("refLink").innerText = referralLink;
+
+    function copyLink() {
+        navigator.clipboard.writeText(referralLink);
+        alert("Referral link copied!");
+    }
+
+    // Load Referral List (FIXED)
+    function loadReferrals() {
+        const refListBox = document.getElementById("refList");
+        let referred = [];
+
+        // Scan storage for all users
+        for (let i = 0; i < localStorage.length; i++) {
+            let key = localStorage.key(i);
+
+            if (key.startsWith("user_")) {
+                let u = JSON.parse(localStorage.getItem(key));
+
+                // FIXED: check referredBy instead of referral
+                if (u.referredBy === referralCode) {
+                    referred.push(u);
+                }
+            }
+        }
+
+        // Display
+        if (referred.length === 0) {
+            refListBox.innerHTML = "<p>No referred users yet.</p>";
+        } else {
+            let output = "";
+            referred.forEach(u => {
+                output += `
+                    <div style="padding:10px; border-bottom:1px solid #eee;">
+                        <strong>${u.username}</strong><br>
+                        <small>${u.email}</small>
+                    </div>
+                `;
+            });
+
+            refListBox.innerHTML = output;
+        }
+    }
+
+    loadReferrals();
+</script>
+
+</body>
+</html>

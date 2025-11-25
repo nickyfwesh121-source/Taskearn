@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | TaskWave</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    <h2>Welcome Back</h2>
+
+    <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="username" placeholder="Enter username">
+    </div>
+
+    <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="Enter password">
+    </div>
+
+    <button class="btn" onclick="loginUser()">Login</button>
+
+    <p class="link">
+        Don’t have an account? <a href="index.html">Register</a>
+    </p>
+</div>
+
+<!-- FIXED LOGIN SCRIPT -->
+<script>
+function loginUser() {
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    if (username === "" || password === "") {
+        alert("Please enter username and password.");
+        return;
+    }
+
+    // ===== ADMIN LOGIN =====
+    if (username.toLowerCase() === "nicky fwesh" && password === "085208") {
+        localStorage.setItem("loggedInUser", username);
+        localStorage.setItem("userRole", "admin");
+        alert("Admin login successful!");
+        window.location.href = "dashboard.html";
+        return;
+    }
+
+    // ===== NORMAL USER LOGIN =====
+    const user = JSON.parse(localStorage.getItem("user_" + username));
+
+    if (!user) {
+        alert("Account not found.");
+        return;
+    }
+
+    if (user.password !== password) {
+        alert("Incorrect password.");
+        return;
+    }
+
+    // Save normal user session
+    localStorage.setItem("loggedInUser", username);
+    localStorage.setItem("userRole", "user");
+
+    alert("Login successful!");
+    window.location.href = "dashboard.html";
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tasks | TaskWave</title>
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .create-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: #007bff;
+            color: white;
+            padding: 8px 15px;
+            font-size: 14px;
+            border-radius: 6px;
+            text-decoration: none;
+            display: none;
+        }
+
+        .approval-btn {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            background: #ff9800;
+            color: white;
+            padding: 8px 15px;
+            font-size: 14px;
+            border-radius: 6px;
+            text-decoration: none;
+            display: none;
+        }
+
+        .task-container {
+            width: 90%;
+            margin: auto;
+            margin-top: 60px;
+        }
+
+        .task-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .task-card h3 {
+            margin-bottom: 5px;
+        }
+
+        .task-card p {
+            margin: 5px 0;
+        }
+
+        .btn-link {
+            background: #007bff;
+            color: white;
+            padding: 8px 12px;
+            text-decoration: none;
+            border-radius: 6px;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .submit-btn {
+            background: green;
+            color: white;
+            padding: 10px;
+            width: 100%;
+            border: none;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-size: 16px;
+        }
+    </style>
+
+</head>
+<body>
+
+<div class="dash-container">
+
+    <h2>Tasks</h2>
+
+    <a href="approval.html" class="approval-btn" id="approvalBtn">Approval</a>
+    <a href="task-create.html" class="create-btn" id="createBtn">+ Create Task</a>
+
+    <div class="task-container" id="taskList"></div>
+
+</div>
+
+<div class="bottom-nav">
+    <a href="dashboard.html" class="nav-item">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-text">Home</span>
+    </a>
+
+    <a href="tasks.html" class="nav-item active">
+        <span class="nav-icon">📋</span>
+        <span class="nav-text">Tasks</span>
+    </a>
+
+    <a href="refer.html" class="nav-item">
+        <span class="nav-icon">👥</span>
+        <span class="nav-text">Refer</span>
+    </a>
+
+    <a href="withdraw.html" class="nav-item">
+        <span class="nav-icon">💰</span>
+        <span class="nav-text">Withdraw</span>
+    </a>
+</div>
+
+
+<script>
+// Check login
+let loggedInUser = localStorage.getItem("loggedInUser");
+
+if (!loggedInUser) {
+    alert("You must login again.");
+    window.location.href = "login.html";
+}
+</script>
+
+
+<script src="tasks.js"></script>
+
+
+<script>
+// Show admin buttons
+let isAdmin = localStorage.getItem("isAdmin") === "true";
+
+if (isAdmin) {
+    document.getElementById("createBtn").style.display = "inline-block";
+    document.getElementById("approvalBtn").style.display = "inline-block";
+}
+</script>
+
+</body>
+</html>

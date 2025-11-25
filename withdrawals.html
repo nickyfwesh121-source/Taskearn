@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdrawal Requests | TaskWave Admin</title>
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .withdraw-box {
+            background: #fff;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+        }
+        .btn-small {
+            padding: 8px 12px;
+            font-size: 14px;
+            margin-right: 6px;
+            border-radius: 8px;
+        }
+        .approve {
+            background: green;
+            color: white;
+        }
+        .decline {
+            background: red;
+            color: white;
+        }
+        .status-badge {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="dash-container">
+    <h2 style="text-align:center;">Withdrawal Requests</h2>
+
+    <div id="withdrawList" style="margin-top:20px;"></div>
+
+    <button class="btn" style="margin-top:20px;" onclick="goBack()">Back to Dashboard</button>
+</div>
+
+<script>
+
+// LOAD ALL WITHDRAWAL REQUESTS
+function loadWithdrawals() {
+    let list = JSON.parse(localStorage.getItem("withdraw_requests")) || [];
+    let container = document.getElementById("withdrawList");
+    container.innerHTML = "";
+
+    if (list.length === 0) {
+        container.innerHTML = "<p style='text-align:center;color:gray;'>No withdrawal requests yet.</p>";
+        return;
+    }
+
+    list.sort((a, b) => b.id - a.id); // newest first
+
+    list.forEach(req => {
+        let box = document.createElement("div");
+        box.className = "withdraw-box";
+
+        box.innerHTML = `
+            <p><strong>User:</strong> ${req.username}</p>
+            <p><strong>Email:</strong> ${req.email}</p>
+            <p><strong>Amount:</strong> ₦${req.amount}</p>
+            <p><strong>Balance Type:</strong> ${req.balanceType === "main" ? "Activity" : "Referral"}</p>
+            <p><strong>Bank:</strong> ${req.bank}</p>
+            <p><strong>Account Name:</strong> ${req.accountName}</p>
+            <p><strong>Account Number:</strong> ${req.accountNumber}</p>
+            <p><strong>Date:</strong> ${req.date}</p>
+
+            <p class="status-badge" style="color:${req.status === "Approved" ? "green" : req.status === "Declined" ? "red" : "orange"};">
+                Status: ${req.status}
+            </p>
+
+            ${req.status === "Pending" ? `
+                <button class="btn-small approve" onclick="approve(${req.id})">Approve</button>
+                <button class="btn-small decline" onclick="decline(${req.id})">Decline</button>
+            ` : ""}
+        `;
+
+        container.appendChild(box);
+    });
+}
+
+
+
+// APPROVE WITHDRAWAL
+function approve(id) {
+    let list = JSON.parse(localStorage.getItem("withdraw_requests")) || [];
+    let users = JSON.parse(localStorage.getItem("users")) || [];
+
+    let req = list.find(r => r.id === id);
+    if (!req) return;
+
+    req.status = "Approved";
+
+    // Update user transaction
+    let user = users.find(u => u.email === req.email);
+    if (user) {
+        if (!user.withdrawals) user.withdrawals = [];
+        let userReq = user.withdrawals.find(r => r.id === id);
+        if (userReq) userReq.status = "Approved";
+    }
+
+    localStorage.setItem("users", JSON.stringify(users));
+    localStorage.setItem("withdraw_requests", JSON.stringify(list));
+
+    loadWithdrawals();
+}
+
+
+
+// DECLINE WITHDRAWAL (Refund)
+function decline(id) {
+    let list = JSON.parse(localStorage.getItem("withdraw_requests")) || [];
+    let users = JSON.parse(localStorage.getItem("users")) || [];
+
+    let req = list.find(r => r.id === id);
+    if (!req) return;
+
+    req.status = "Declined";
+
+    // Refund the user
+    let user = users.find(u => u.email === req.email);
+    if (user) {
+        if (req.balanceType === "main") {
+            user.balance += req.amount;
+        } else {
+            user.referralBalance += req.amount;
+        }
+
+        let userReq = user.withdrawals.find(r => r.id === id);
+        if (userReq) userReq.status = "Declined";
+    }
+
+    localStorage.setItem("users", JSON.stringify(users));
+    localStorage.setItem("withdraw_requests", JSON.stringify(list));
+
+    loadWithdrawals();
+}
+
+
+
+function goBack() {
+    window.location.href = "dashboard.html";
+}
+
+window.onload = loadWithdrawals;
+
+</script>
+
+</body>
+</html>

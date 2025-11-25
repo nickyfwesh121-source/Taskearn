@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Approval | TaskWave</title>
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        body {
+            background: #f5f5f5;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .dash-container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 800;
+        }
+
+        .submission-card {
+            background: #fff;
+            padding: 15px;
+            border-radius: 14px;
+            margin-bottom: 18px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .submission-card h3 {
+            margin: 0 0 8px 0;
+            font-weight: 700;
+        }
+
+        .submission-card img {
+            width: 100%;
+            border-radius: 10px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .submission-info p {
+            margin: 6px 0;
+            font-size: 14px;
+        }
+
+        .reward {
+            font-weight: 700;
+            color: #28a745;
+            margin-top: 8px;
+        }
+
+        .action-btn {
+            width: 48%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .approve {
+            background: #0ea60e;
+        }
+
+        .reject {
+            background: #e11b1b;
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="dash-container">
+    <h2>Pending Approvals</h2>
+
+    <div id="approvalList"></div>
+</div>
+
+<script src="task-approval.js"></script>
+
+</body>
+</html>

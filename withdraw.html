@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdraw | TaskWave</title>
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        #balanceType {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="dash-container">
+    <h2>Withdraw</h2>
+
+    <p style="margin-top:20px; text-align:center;">
+        Enter your withdrawal details.
+    </p>
+
+    <div style="width:85%; margin:auto; margin-top:20px;">
+
+        <label>Choose Balance</label>
+        <select id="balanceType">
+            <option value="main">Activity Balance (Min ₦250)</option>
+            <option value="referral">Referral Balance (Min ₦1,000)</option>
+        </select>
+
+        <label>Amount</label>
+        <input type="number" id="withdrawAmount" class="input">
+
+        <label>Bank Name</label>
+        <input type="text" id="withdrawBank" class="input">
+
+        <label>Account Name</label>
+        <input type="text" id="withdrawAccountName" class="input">
+
+        <label>Account Number</label>
+        <input type="text" id="withdrawAccountNumber" class="input">
+
+        <button class="btn" style="margin-top:15px;" onclick="submitWithdrawal()">
+            Submit Request
+        </button>
+    </div>
+</div>
+
+<!-- Bottom Navigation -->
+<div class="bottom-nav">
+    <a href="dashboard.html" class="nav-item">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-text">Home</span>
+    </a>
+
+    <a href="tasks.html" class="nav-item">
+        <span class="nav-icon">📋</span>
+        <span class="nav-text">Tasks</span>
+    </a>
+
+    <a href="refer.html" class="nav-item">
+        <span class="nav-icon">👥</span>
+        <span class="nav-text">Refer</span>
+    </a>
+
+    <a href="withdraw.html" class="nav-item active">
+        <span class="nav-icon">💰</span>
+        <span class="nav-text">Withdraw</span>
+    </a>
+</div>
+
+<script>
+function submitWithdrawal() {
+    let balanceType = document.getElementById("balanceType").value;
+    let amount = parseFloat(document.getElementById("withdrawAmount").value);
+    let bank = document.getElementById("withdrawBank").value.trim();
+    let accName = document.getElementById("withdrawAccountName").value.trim();
+    let accNumber = document.getElementById("withdrawAccountNumber").value.trim();
+
+    if (!amount || !bank || !accName || !accNumber) {
+        alert("Please fill all fields.");
+        return;
+    }
+
+    // ✅ Correct minimum based on selected balance
+    let minAmount = balanceType === "main" ? 250 : 1000;
+
+    if (amount < minAmount) {
+        alert(
+            "Minimum withdrawal for " +
+            (balanceType === "main" ? "activity balance" : "referral balance") +
+            " is ₦" + minAmount
+        );
+        return;
+    }
+
+    let loggedUser = JSON.parse(localStorage.getItem("loggedUser"));
+    if (!loggedUser) {
+        alert("You are not logged in.");
+        return;
+    }
+
+    let users = JSON.parse(localStorage.getItem("users")) || [];
+    let user = users.find(u => u.email === loggedUser.email);
+
+    if (!user) {
+        alert("User not found.");
+        return;
+    }
+
+    // Check balance based on selection
+    let availableBalance = balanceType === "main" ? user.balance : user.referralBalance;
+
+    if (availableBalance < amount) {
+        alert("Insufficient " + (balanceType === "main" ? "activity" : "referral") + " balance.");
+        return;
+    }
+
+    // ✅ Deduct immediately to prevent multiple withdrawals
+    if (balanceType === "main") {
+        user.balance -= amount;
+    } else {
+        user.referralBalance -= amount;
+    }
+
+    // Save user updated balance
+    localStorage.setItem("users", JSON.stringify(users));
+
+    // SAVE user withdrawal history
+    if (!user.withdrawals) user.withdrawals = [];
+
+    let withdrawal = {
+        id: Date.now(),
+        email: user.email,
+        username: user.username,
+        amount: amount,
+        balanceType: balanceType,
+        bank: bank,
+        accountName: accName,
+        accountNumber: accNumber,
+        status: "Pending",
+        date: new Date().toLocaleString()
+    };
+
+    user.withdrawals.push(withdrawal);
+
+    // Save updated user data
+    localStorage.setItem("users", JSON.stringify(users));
+
+    // ✅ Also add to GLOBAL withdrawal list for admin panel
+    let allRequests = JSON.parse(localStorage.getItem("withdraws")) || [];
+    allRequests.push(withdrawal);
+    localStorage.setItem("withdraws", JSON.stringify(allRequests));
+
+    alert("Withdrawal request submitted successfully!");
+    window.location.href = "dashboard.html";
+}
+</script>
+
+</body>
+</html>

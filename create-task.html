@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Task | TaskWave</title>
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .form-box {
+            width: 90%;
+            margin: auto;
+            margin-top: 20px;
+        }
+
+        .form-box input, .form-box textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 12px;
+            border-radius: 6px;
+            border: 1px solid #aaa;
+        }
+
+        .btn-publish {
+            width: 100%;
+            background: #007bff;
+            color: white;
+            padding: 12px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="dash-container">
+
+    <h2>Create New Task</h2>
+
+    <div class="form-box">
+
+        <label>Task Title</label>
+        <input type="text" id="taskTitle" placeholder="Example: Follow our Instagram page">
+
+        <label>Task Description</label>
+        <textarea id="taskDescription" rows="4" placeholder="Explain what the user must do"></textarea>
+
+        <label>Reward (₦)</label>
+        <input type="number" id="taskReward" placeholder="e.g. 50">
+
+        <label>Task Link</label>
+        <input type="text" id="taskLink" placeholder="https://example.com/action">
+
+        <label>Number of Slots</label>
+        <input type="number" id="taskSlots" placeholder="Example: 100">
+
+        <button class="btn-publish" onclick="publishTask()">Publish Task</button>
+
+    </div>
+
+</div>
+
+<script>
+function publishTask() {
+    let title = document.getElementById("taskTitle").value.trim();
+    let desc = document.getElementById("taskDescription").value.trim();
+    let reward = document.getElementById("taskReward").value.trim();
+    let link = document.getElementById("taskLink").value.trim();
+    let slots = document.getElementById("taskSlots").value.trim();
+
+    if (!title || !desc || !reward || !slots) {
+        alert("Please fill all required fields.");
+        return;
+    }
+
+    let newTask = {
+        id: Date.now(),
+        title,
+        desc,
+        reward: Number(reward),
+        link: link,       // 🔥 FIX — save the task link properly
+        slots: Number(slots),
+        taken: 0
+    };
+
+    // Save task to localStorage
+    let tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
+    tasks.push(newTask);
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+
+    alert("Task Published Successfully!");
+    window.location.href = "tasks.html";
+}
+</script>
+
+<div class="bottom-nav">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="tasks.html" class="active">Tasks</a>
+    <a href="refer.html">Refer</a>
+    <a href="withdraw.html">Withdraw</a>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | TaskWave</title>
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .logo-box {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: #000;
+            padding: 10px;
+            border-radius: 12px;
+        }
+
+        .logo-box img {
+            width: 30px;
+            height: auto;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="logo-box">
+    <img src="logo.png" alt="TaskWave Logo">
+</div>
+
+<div class="dash-container">
+
+    <h2 class="page-title">Dashboard</h2>
+
+    <p id="welcomeText" style="font-size: 18px; text-align:center; margin-top:-10px;"></p>
+
+    <!-- Balance Boxes -->
+    <div class="balance-wrapper">
+        <div class="balance-card">
+            <h4>Main Balance</h4>
+            <p id="mainBalance">₦0</p>
+        </div>
+
+        <div class="balance-card">
+            <h4>Referral Balance</h4>
+            <p id="refBalance">₦0</p>
+        </div>
+    </div>
+
+    <button class="btn" onclick="logout()">Logout</button>
+
+    <!-- ADMIN BUTTONS -->
+    <div class="adminOnly" style="display:none; margin-top:20px; text-align:center;">
+        <a href="create-task.html" class="btn">Create Task</a>
+        <a href="approval.html" class="btn">Approve Tasks</a>
+        <a href="withdrawals.html" class="btn">Withdrawals</a>
+    </div>
+
+    <h2 style="margin-top: 30px; text-align:center;">Recent Transactions</h2>
+
+    <div id="transactionsList" style="width: 90%; margin: auto; margin-top: 10px;"></div>
+
+</div>
+
+<!-- BOTTOM NAVIGATION -->
+<div class="bottom-nav">
+    <a href="dashboard.html" class="nav-item active">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-text">Home</span>
+    </a>
+
+    <a href="tasks.html" class="nav-item">
+        <span class="nav-icon">📋</span>
+        <span class="nav-text">Tasks</span>
+    </a>
+
+    <a href="refer.html" class="nav-item">
+        <span class="nav-icon">👥</span>
+        <span class="nav-text">Refer</span>
+    </a>
+
+    <a href="withdraw.html" class="nav-item">
+        <span class="nav-icon">💰</span>
+        <span class="nav-text">Withdraw</span>
+    </a>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    let username = localStorage.getItem("loggedInUser");
+    let userRole = localStorage.getItem("userRole");
+
+    if (!username) {
+        alert("You must log in first.");
+        window.location.href = "login.html";
+        return;
+    }
+
+    document.getElementById("welcomeText").innerText = "Welcome, " + username;
+
+    let userData = JSON.parse(localStorage.getItem("user_" + username) || "{}");
+
+    document.getElementById("mainBalance").innerText = "₦" + (userData.balance || 0);
+    document.getElementById("refBalance").innerText = "₦" + (userData.refBalance || 0);
+
+    if (userRole === "admin") {
+        document.querySelector(".adminOnly").style.display = "block";
+    }
+
+    loadTransactions();
+});
+
+/* Load transactions */
+function loadTransactions() {
+    let username = localStorage.getItem("loggedInUser");
+    let transactions = JSON.parse(localStorage.getItem("transactions_" + username) || "[]");
+
+    let container = document.getElementById("transactionsList");
+    container.innerHTML = "";
+
+    if (transactions.length === 0) {
+        container.innerHTML = "<p style='text-align:center; color:gray;'>No transactions yet.</p>";
+        return;
+    }
+
+    transactions.forEach(tx => {
+        let div = document.createElement("div");
+        div.style = `
+            background:white;
+            padding:12px;
+            border-radius:10px;
+            margin-bottom:10px;
+            box-shadow:0 1px 4px rgba(0,0,0,0.1);
+        `;
+
+        div.innerHTML = `
+            <strong>${tx.type}</strong><br>
+            <span style="color:${
+                tx.status === "Approved" ? "green" :
+                tx.status === "Rejected" ? "red" :
+                "orange"
+            };">
+                Status: ${tx.status}
+            </span>
+        `;
+
+        container.appendChild(div);
+    });
+}
+
+function logout() {
+    localStorage.removeItem("loggedInUser");
+    localStorage.removeItem("userRole");
+    window.location.href = "login.html";
+}
+</script>
+
+</body>
+</html>
